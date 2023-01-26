@@ -1,0 +1,2 @@
+make it so when u click on a sqr which has already been clicked on it rms all of the green
+uncomment color stuff

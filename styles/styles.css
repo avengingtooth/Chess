@@ -1,0 +1,56 @@
+*{
+    margin: 0;
+    padding: 0;
+}
+
+body{
+    height: max-content;
+    overflow: hidden;
+}
+
+.row{
+    display: grid;
+    grid-template-rows: repeat(8, 1fr);
+}
+
+.gameBoard{
+    width: 50vh;
+    height: 50vh;
+    margin: auto;
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+}
+
+.possibleMove{
+    background-color: rgba(0, 128, 0, 50%);
+}
+
+
+/*temp*/
+.column{
+    border: blue dotted 1px;
+    display: flex;
+    justify-content: center;
+}
+
+.gameBoard{
+    text-align: center;
+}
+
+*{
+    border: 1px red solid;
+}
+
+.piece{
+    width: 80%;
+    height: 80%;
+    margin: auto;
+}
+
+[color='black']{
+    background-color: lightblue;
+}
+
+[color='white']{
+    background-color: pink;
+}
