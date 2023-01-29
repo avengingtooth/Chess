@@ -1,0 +1,74 @@
+:root{
+    --blackColor: darkgrey;
+    --whiteColor: beige;
+    --borderWidth: 1px;
+    --borderColor: white;
+    --whitePiece: white;
+    --blackPiece: darkgrey;
+}
+
+[color='black']{
+    background-color: var(--blackPiece);
+    color: black;
+}
+
+[color='white']{
+    background-color: var(--whitePiece);
+    color: black;
+}
+
+.black, .white{
+    border: var(--borderWidth) var(--borderColor) solid;
+}
+
+.black{
+    background-color: var(--blackColor);
+}
+
+.white{
+    background-color: var(--whiteColor);
+}
+
+.boardBoarder{
+    width: 100%;
+    padding: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.gradient{
+    background-image: linear-gradient(to top,var(--whiteColor), var(--blackColor), var(--whiteColor), var(--blackColor), var(--whiteColor));
+    background-size: auto 200%;
+    animation: up 1s infinite linear;
+}
+
+@keyframes up {
+    0%{
+        background-position: top left;
+    }
+
+    100%{
+        background-position: bottom right; 
+    }
+}
+
+ul{
+    list-style: none;
+}
+
+.column{
+    display: flex;
+    justify-content: center;
+}
+
+.gameBoard{
+    text-align: center;
+}
+
+.piece{
+    width: 80%;
+    height: 80%;
+    margin: auto;
+    border: solid 1px black;
+}

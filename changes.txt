@@ -1,2 +1,7 @@
 make it so when u click on a sqr which has already been clicked on it rms all of the green
 uncomment color stuff
+enpassant rule
+changing border width
+
+idea if in vr
+wall around the sides of board blur when u walk into them

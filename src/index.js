@@ -1,57 +1,83 @@
-//import Pieces from "./generalPieceInfo"
-
 //state machines for king check
+// import {start} from './matrix.js'
+// import {change} from './matrix.js'
+// import { remove } from './matrix.js'
+import { checkForCheck } from "./checkMate.js"
+
 let handlers = []
+let pieceHandlers = []
+let rmPieceHandlers = []
 let playerTurn = 'white'
+let pieces = {
+    'black': [],
+    'white': []
+}
+
+let oppColor = {
+    'black': 'white',
+    'white': 'black'
+}
+
+let kings = {
+    'black': undefined,
+    'white': undefined
+}
 
 function setUp(){
-    for (let y = 1; y < 9; y++){
-        for (let x = 1; x < 9; x++){
-            if (y == 1 || y == 8){
-                //Check for corners aka towers
-                if (x == 1 || x == 8){
+    // start()
+    for (let y = 0; y < 8; y++){
+        for (let x = 0; x < 8; x++){
+            let cur = document.querySelector(`#row${x} .column${y}`)
+            if (((y * 9) +  x) % 2 == 0){
+                cur.classList.add('black') 
+            }
+            else{
+                cur.classList.add('white')
+            }
+            if (y == 0 || y == 7){
+
+                if (x == 0 || x == 7){
                     new Tower(x, y).loadPiece()
                 }
 
-                //Check for bishops
-                else if (x == 2 || x == 7){
-                    new Bishop(x, y).loadPiece()
-                }
-
-                //Check for knights
-                else if (x == 3 || x == 6){
+                else if (x == 1 || x == 6){
                     new Knight(x, y).loadPiece()
                 }
 
-                else if(y == 1){
-                    if (x == 5){
+                else if (x == 2 || x == 5){
+                    new Bishop(x, y).loadPiece()
+                }
+
+                else if(y == 0){
+                    if (x == 4){
                         new Queen(x, y).loadPiece()
                     }
                     else{
-                        new King(x, y).loadPiece()
+                        kings['white'] = new King(x, y).loadPiece()
                     }
                 }
 
                 else{
-                    if (x == 5){
-                        new King(x, y).loadPiece()
+                    if (x == 4){
+                        new Queen(x, y).loadPiece()
                     }
                     else{
-                        new Queen(x, y).loadPiece()
+                        kings['black'] = new King(x, y).loadPiece()
                     }
                 }
             }
 
             //Check for pawn
-            if (y == 2 || y == 7){
+            if (y == 1 || y == 6){
                 new Pawn(x, y).loadPiece()
             }
         }
     }
-    new Tower(4, 4).loadPiece()
+    pieceHandlers.forEach(e => e())
 }
 
-class Pieces{
+export default class Pieces{
+
     place(x, y, text, color){
         let sqr = this.selectSqr(x, y, 'div')
         sqr.textContent = text
@@ -66,33 +92,51 @@ class Pieces{
         else{
             sqr.setAttribute('color', color)
         }
+
         return sqr
     }
 
     inRange(x, y){
-        return (0 < x && x <= 8 && 0 < y && y <= 8)
+        return (0 <= x && x < 8 && 0 <= y && y < 8)
     }
 
     move(x, y, obj){
         if (this.inRange(x, y)){
             let sqr = this.selectSqr(x, y, ' ')
             let pieceColor = this.selectSqr(x, y, 'div')
-            if(pieceColor == null || pieceColor != sqr.color){
-                if (this.name == 'pawn'){
-                    if (pieceColor == null && obj.x != x){
-                        return
-                    }
-                    else if (pieceColor != null && obj.x == x){
-                        return
-                    }
+            if(this.checkCollision(pieceColor, obj, x)){
+
+                if(pieceColor != null){
+                    pieceColor.removeEventListener('click', pieceHandlers[pieceColor.getAttribute('pieceHandlerInd')])
+                    rmPieceHandlers.push(pieceColor)
                 }
                 sqr.classList.add('possibleMove') 
                 //UNCOMMENT COLOR STUFF
                 //if (obj.color == playerTurn){
-                handlers.unshift([sqr, () => {this.moveClickable(x, y, obj, sqr, pieceColor)}])
-                sqr.addEventListener('click', handlers[0][1])
+                    handlers.unshift([sqr, () => {this.moveClickable(x, y, obj, sqr, pieceColor)}])
+                    sqr.addEventListener('click', handlers[0][1])
                 //}
             }
+            // else{
+            //     if (!checkForCheck(pieces[obj.color], kings[obj.color])){
+            //         console.log('chekkkk')
+            //     }
+            // }
+        }
+    }
+
+    checkCollision(pieceColor, obj, x){
+        if(pieceColor == null || pieceColor.getAttribute('color') != obj.element.getAttribute('color')){
+            if (this.name == 'pawn'){
+                if (pieceColor == null && obj.x != x){
+                    return false
+                }
+                else if (pieceColor != null && obj.x == x){
+                    return false
+                }
+                return true
+            }
+            return true
         }
     }
 
@@ -103,13 +147,25 @@ class Pieces{
         else{
             playerTurn = 'white'
         }
-        console.log(playerTurn)
         if (pieceColor != null){
             pieceColor.remove()
         }
+
         sqr.append(obj.element)
         obj.x = x
         obj.y = y
+        if(obj.color == 'black'){
+            checkForCheck(pieces['black'], kings['black'])
+        }
+        else{
+            checkForCheck(pieces['white'], kings['white'])
+        }
+
+        // if (check){
+        //     if (checkMate(pieces, obj.color, king)){
+        //         console.log(obj.color + ' wins')
+        //     }
+        // }
         this.reset()
     }
 
@@ -118,6 +174,10 @@ class Pieces{
             let e = vals [0]
             let handler = vals [1]
             e.removeEventListener('click', handler)
+        })
+
+        rmPieceHandlers.forEach(pieceColor => {
+            pieceColor.addEventListener('click', pieceHandlers[pieceColor.getAttribute('pieceHandlerInd')])
         })
 
         document.querySelectorAll('.possibleMove').forEach(e =>{
@@ -140,15 +200,20 @@ class Pieces{
     }
 
     moveParams(obj){
-        obj.element.addEventListener('click', () => {
-            this.reset()
-            obj.calcMoves()
-            obj.movements.forEach((moveSqr, ind) => {
-                if ((!Object.keys(obj.movements).includes(ind)) || (obj.movements[ind])){
-                    this.move(moveSqr[0], moveSqr[1], obj)
-                }
-            })
+        pieces[obj.color].push(obj)
+        pieceHandlers.push( () => {
+                this.reset()
+                obj.calcMoves()
+                obj.movements.forEach((moveSqr, ind) => {
+                    if ((!Object.keys(obj.movements).includes(ind)) || (obj.movements[ind])){
+                        this.move(moveSqr[0], moveSqr[1], obj)
+                    }
+                })
         })
+
+        let ind = pieceHandlers.length - 1
+        obj.element.addEventListener('click', pieceHandlers[ind])
+        obj.element.setAttribute('pieceHandlerInd', ind)
     }
 
     horizontalOrDiagonal(times, xInc, yInc, obj){
@@ -174,19 +239,21 @@ class Pieces{
                 [x - curX, y + curY, obj]
             ]
             toCheck.forEach((vals, ind) => {
-                let target = this.selectSqr(vals[0], vals[1], 'div')
-                if (target == null && cont[ind] == true && this.inRange(vals[0], vals[1])){
-                    obj.movements.push(vals)
-                    //document.querySelector(`#row${vals[0]} .column${vals[1]}`).style.backgroundColor = 'purple'
-                }
-                else{
-                    cont[ind] = false
-                    // try{
-                    //     document.querySelector(`#row${vals[0]} .column${vals[1]}`).style.backgroundColor = 'red'
-                    // }
-                    // catch{
-
-                    // }
+                if (this.inRange(vals[0], vals[1])){
+                    let target = this.selectSqr(vals[0], vals[1], 'div')
+                    if (target == null && cont[ind] == true){
+                        obj.movements.push(vals)
+                        //document.querySelector(`#row${vals[0]} .column${vals[1]}`).style.backgroundColor = 'purple'
+                    }
+                    else{
+                        if (cont[ind]){
+                            if(target.getAttribute('color') != obj.element.getAttribute('color')){
+                                //document.querySelector(`#row${vals[0]} .column${vals[1]}`).style.backgroundColor = 'red'
+                                obj.movements.push(vals)
+                            }
+                        }
+                        cont[ind] = false
+                    }
                 }
             })
         }
@@ -199,9 +266,9 @@ class Pawn extends Pieces{
         this.x = x
         this.y = y
         this.color = super.checkColor(this.y)
-        this.element = super.place(this.x, this.y, 'pawn')
         this.name = 'pawn'
-        if (this.y == 2){
+        this.element = super.place(this.x, this.y, this.name)
+        if (this.y == 1){
             this.direction = 1
         }
         else{
@@ -216,7 +283,7 @@ class Pawn extends Pieces{
             [this.x - this.direction, this.y + this.direction, this]
         ]
 
-        if((this.y == 2 && this.color == 'black') || (this.y == 7 && this.color == 'white')){
+        if((this.y == 1 && this.color == 'black') || (this.y == 6 && this.color == 'white')){
             this.movements.push([this.x, this.y + (2 * this.direction), this])
         }
     }
@@ -231,34 +298,14 @@ class Tower extends Pieces{
         super()
         this.x = x
         this.y = y
-        this.element = this.place(this.x, this.y, 'tower')
         this.name = 'tower'
+        this.color = super.checkColor(this.y)
+        this.element = this.place(this.x, this.y, this.name)
     }
 
     calcMoves(){
         this.movements = []
         super.horizontalOrDiagonal(8, 1, 0, this)
-        console.log(this.movements)
-    }
-
-    loadPiece(){
-        super.moveParams(this)
-    }
-}
-
-class Knight extends Pieces{
-    constructor(x, y){
-        super()
-        this.x = x
-        this.y = y
-        this.color = super.checkColor(this.y)
-        this.element = this.place(this.x, this.y, 'knight')
-        this.name = 'knight'
-    }
-
-    calcMoves(){
-        this.movements = []
-        super.horizontalOrDiagonal(8, 1, 1, this)
     }
 
     loadPiece(){
@@ -272,8 +319,28 @@ class Bishop extends Pieces{
         this.x = x
         this.y = y
         this.color = super.checkColor(this.y)
-        this.element = this.place(this.x, this.y, 'bishop')
         this.name = 'bishop'
+        this.element = this.place(this.x, this.y, this.name)
+    }
+
+    calcMoves(){
+        this.movements = []
+        super.horizontalOrDiagonal(8, 1, 1, this)
+    }
+
+    loadPiece(){
+        super.moveParams(this)
+    }
+}
+
+class Knight extends Pieces{
+    constructor(x, y){
+        super()
+        this.x = x
+        this.y = y
+        this.color = super.checkColor(this.y)
+        this.name = 'knight'
+        this.element = this.place(this.x, this.y, this.name)
     }
 
     calcMoves(){
@@ -301,8 +368,8 @@ class Queen extends Pieces{
         this.x = x
         this.y = y
         this.color = super.checkColor(this.y)
-        this.element = this.place(this.x, this.y, 'queen')
         this.name = 'queen'
+        this.element = this.place(this.x, this.y, this.name)
     }
 
     calcMoves(){
@@ -322,8 +389,8 @@ class King extends Pieces{
         this.x = x
         this.y = y
         this.color = super.checkColor(this.y)
-        this.element = this.place(this.x, this.y, 'king')
         this.name = 'king'
+        this.element = this.place(this.x, this.y, this.name)
     }
     
     calcMoves(){
@@ -334,6 +401,7 @@ class King extends Pieces{
 
     loadPiece() {
         super.moveParams(this)
+        return this
     }
 }
 
