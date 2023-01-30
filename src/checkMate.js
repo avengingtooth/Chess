@@ -24,8 +24,11 @@ function checkForCheck(pieces, king){
             }
         })
     })
-    //attacks[king.y][king.x] = 'Y'
-    //console.log(attacks)
+    // attacks[king.y][king.x] = 'Y'
+    console.log(attacks)
+    if(check){
+        console.log(piecesCausingCheck, 'pieces')
+    }
     return check
 
 }

@@ -1,0 +1,2 @@
+the queen has her right front diagonal twice
+still detects as checking urself when the piece is gonna be eaten

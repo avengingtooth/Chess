@@ -1,7 +1,3 @@
-//state machines for king check
-// import {start} from './matrix.js'
-// import {change} from './matrix.js'
-// import { remove } from './matrix.js'
 import { checkForCheck } from "./checkMate.js"
 
 let handlers = []
@@ -141,32 +137,27 @@ export default class Pieces{
     }
 
     moveClickable(x, y, obj, sqr, pieceColor){ 
-        if (playerTurn == 'white'){
-            playerTurn = 'black'
-        }
-        else{
-            playerTurn = 'white'
-        }
-        if (pieceColor != null){
-            pieceColor.remove()
-        }
-
         sqr.append(obj.element)
-        obj.x = x
-        obj.y = y
-        if(obj.color == 'black'){
-            checkForCheck(pieces['black'], kings['black'])
+        console.log('oidksk')
+        if (!checkForCheck(pieces[oppColor[obj.color]], kings[obj.color])){
+            obj.x = x
+            obj.y = y
+            if (playerTurn == 'white'){
+                playerTurn = 'black'
+            }
+            else{
+                playerTurn = 'white'
+            }
+            if (pieceColor != null){
+                pieceColor.remove()
+            }
+            this.reset()
         }
         else{
-            checkForCheck(pieces['white'], kings['white'])
+            let sqr = this.selectSqr(obj.x, obj.y, ' ').append(obj.element)
+            console.log('check urselft')
+            console.log(pieces[obj.color], kings[obj.color])
         }
-
-        // if (check){
-        //     if (checkMate(pieces, obj.color, king)){
-        //         console.log(obj.color + ' wins')
-        //     }
-        // }
-        this.reset()
     }
 
     reset(){
@@ -192,10 +183,10 @@ export default class Pieces{
 
     checkColor(y){
         if(y <= 2){
-            return 'black'
+            return 'white'
         }
         else{
-            return 'white'
+            return 'black'
         }
     }
 
@@ -283,7 +274,7 @@ class Pawn extends Pieces{
             [this.x - this.direction, this.y + this.direction, this]
         ]
 
-        if((this.y == 1 && this.color == 'black') || (this.y == 6 && this.color == 'white')){
+        if((this.y == 1 && this.color == 'white') || (this.y == 6 && this.color == 'black')){
             this.movements.push([this.x, this.y + (2 * this.direction), this])
         }
     }
